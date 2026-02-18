@@ -15,33 +15,11 @@ const a2uiAppDir = path.join(rootDir, "apps", "shared", "OpenClawKit", "Tools", 
 
 const isWin = process.platform === "win32";
 
-function which(name) {
-  const dirs = (process.env.PATH ?? "").split(path.delimiter).filter(Boolean);
-  const exts = isWin
-    ? (process.env.PATHEXT ?? ".EXE;.CMD;.BAT;.COM").split(";").filter(Boolean)
-    : [""];
-  for (const dir of dirs) {
-    for (const ext of exts) {
-      const candidate = path.join(dir, `${name}${ext}`);
-      try {
-        if (fs.existsSync(candidate)) {
-          return candidate;
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }
-  return name;
-}
-
 function run(cmd, args) {
-  const resolved = which(cmd);
-  const needsShell = isWin && /\.(cmd|bat|com)$/i.test(path.extname(resolved));
-  const result = spawnSync(resolved, args, {
+  const result = spawnSync(cmd, args, {
     stdio: "inherit",
     cwd: rootDir,
-    shell: needsShell,
+    shell: isWin,
   });
   if (result.error) {
     throw result.error;
